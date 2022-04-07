@@ -36,7 +36,14 @@ pip install -r requirements.txt
 A simple demonstration has been put together to illustrate the basic features of pybullet. This code can be found in the `lightning-talk/` folder. To run the demo, simply run `python lightning-talk/demo.py` from the base directoy.
 
 ## PyBullet GUI
-The PyBullet GUI provides a live view of the pybullet simulation and enables control of elements within the simulation. Most notibly, the speed of the two wheels of the simple demo bot can be set using the corrosponding sliders on the right.
+The PyBullet GUI provides a live view of the pybullet simulation and enables control of elements within the simulation. Robot control parameters can be set via the sliders on the right sidebar. These are listed in detail below.
+
+**Parameters:**
+- Turn: defines how quickly the robot should "spin"
+- Traverse: defines how quickly the robot should drive forward/backward
+- P: proportional gain
+- I: integral gain
+- D: derivative gain
 
 **Controls:**
 - scroll: zoom in/out
@@ -47,5 +54,5 @@ A screenshot of the PyBullet GUI can be seen below...
 ![gui window](readme/pybullet_gui_screenshot.png)
 
 ## Matplotlib Graph
-A matplotlib graph window will also open and displays live pitch data. Data points are recorded every 5 simulation steps and only the most recent 25 recorded data points are displayed at any given time. An example of what this window looks like can be seen below...
+A matplotlib graph window will also open and displays live data. Data points are recorded every simulation step and only the most recent 100 data points are saved and displayed at any given time. An example of what this window looks like can be seen below...
 ![matplotlib figure](readme/graph_screenshot.png)
