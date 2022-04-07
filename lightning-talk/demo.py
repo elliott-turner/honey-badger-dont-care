@@ -28,15 +28,16 @@ plt.ylabel('Pitch')
 plt.grid()
 
 buffer_size = 25
-x = [-2, -1]
-y = [0, 0]
+x = [i for i in range(-buffer_size+1, 1)]
+y = [0 for _ in range(buffer_size)]
 
 line, = ax.plot(x, y)
 ax.set_ylim(-180, 180)
 
 fig.canvas.draw()
 
-for i in range (10000):
+i = 1
+while True:
     p.setJointMotorControl2(bot_id, 0, p.VELOCITY_CONTROL,
         targetVelocity=p.readUserDebugParameter(left_wheel_input))
     p.setJointMotorControl2(bot_id, 1, p.VELOCITY_CONTROL,
@@ -44,12 +45,10 @@ for i in range (10000):
 
     pitch = p.getEulerFromQuaternion(p.getBasePositionAndOrientation(bot_id)[1])[1]*180/3.1415
 
-    if i%5 == 0:
-        x.append(i)
+    if i >= 5:
+        i = 1
         y.append(pitch)
-        if len(x) > buffer_size:
-            x.pop(0)
-            y.pop(0)
+        y.pop(0)
 
         line.set_data(x, y)
         ax.set_xlim(x[0], x[-1])
@@ -58,4 +57,5 @@ for i in range (10000):
 
     p.stepSimulation()
     time.sleep(1./500.)
+    i += 1
 p.disconnect()
