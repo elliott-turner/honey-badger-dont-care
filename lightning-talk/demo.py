@@ -99,8 +99,8 @@ while True: # main loop
     buffers[4][2].pop(0)
 
     # set robot motor target speeds
-    p.setJointMotorControl2(bot_id, 0, p.VELOCITY_CONTROL, targetVelocity=ctrl)
-    p.setJointMotorControl2(bot_id, 1, p.VELOCITY_CONTROL, targetVelocity=ctrl)
+    p.setJointMotorControl2(bot_id, 0, p.VELOCITY_CONTROL, targetVelocity=ml)
+    p.setJointMotorControl2(bot_id, 1, p.VELOCITY_CONTROL, targetVelocity=mr)
 
     # update graphs
     for ax, line, buff, background in zip(axs, lines, buffers, backgrounds):
