@@ -28,54 +28,47 @@ gs = gridspec.GridSpec(1, 2, figure=fig)
 gs_io = gs[0].subgridspec(2,1)
 gs_pid = gs[1].subgridspec(3, 1)
 
-ax_t = fig.add_subplot(gs_io[0])
-ax_p = fig.add_subplot(gs_pid[0])
-ax_i = fig.add_subplot(gs_pid[1])
-ax_d = fig.add_subplot(gs_pid[2])
-ax_m = fig.add_subplot(gs_io[1])
-all_ax = [ax_t, ax_p, ax_i, ax_d, ax_m]
+subplots = [gs_io[0], gs_pid[0], gs_pid[1], gs_pid[2], gs_io[1]]
+axs = [fig.add_subplot(subplot) for subplot in subplots]
 
-ax_t.get_xaxis().set_ticklabels([])
-ax_p.get_xaxis().set_ticklabels([])
-ax_i.get_xaxis().set_ticklabels([])
+axs[0].get_xaxis().set_ticklabels([])
+axs[1].get_xaxis().set_ticklabels([])
+axs[2].get_xaxis().set_ticklabels([])
 
-ax_t.set_title('Sensor Input')
-ax_p.set_title('Proportional')
-ax_i.set_title('Integral')
-ax_d.set_title('Derivative')
-ax_m.set_title('Motor Output')
+titles = ['Sensor Input', 'Proportional', 'Integral', 'Derivative', 'Motor Output']
+for ax, title in zip(axs, titles): ax.set_title(title)
 
 # create data buffers
 buffer_size = 100
 x = [i for i in range(-buffer_size+1, 1)]
-t_buff = [0 for _ in range(buffer_size)]
-p_buff = [0 for _ in range(buffer_size)]
-i_buff = [0 for _ in range(buffer_size)]
-d_buff = [0 for _ in range(buffer_size)]
-m_buff = [0 for _ in range(buffer_size)]
+tbuff = [0 for _ in range(buffer_size)]
+buffers = [
+    [[0 for _ in range(buffer_size)]],
+    [[0 for _ in range(buffer_size)]],
+    [[0 for _ in range(buffer_size)]],
+    [[0 for _ in range(buffer_size)]],
+    [[0 for _ in range(buffer_size)], [0 for _ in range(buffer_size)], [0 for _ in range(buffer_size)]]
+    ]
 
 # plot data on graphs
-t_line = ax_t.plot(x, t_buff, color='black')[0]
-p_line = ax_p.plot(x, p_buff, color='red')[0]
-i_line = ax_i.plot(x, i_buff, color='orange')[0]
-d_line = ax_d.plot(x, d_buff, color='yellow')[0]
-m_line = ax_m.plot(x, m_buff, color='black')[0]
-ml_line = ax_m.plot(x, m_buff, color='blue')[0]
-mr_line = ax_m.plot(x, m_buff, color='purple')[0]
+colors = [['black'], ['red'], ['orange'], ['yellow'], ['black', 'blue', 'purple']]
+lines = [[ax.plot(x, b, color=c)[0] for c,b in zip(color, buff)] for ax, buff, color in zip(axs, buffers, colors)]
 
-for ax in all_ax:
+ylims = [[-100, 100], [-1, 1], [-50, 50], [-0.1, 0.1], [-100, 100]]
+for ax, ylim in zip(axs, ylims):
     ax.grid()
     ax.set_xlim(x[0], x[-1])
+    ax.set_ylim(ylim[0], ylim[1])
 
 fig.canvas.draw()
+backgrounds = [fig.canvas.copy_from_bbox(ax.bbox) for ax in axs]
 
-i = 1
 while True: # main loop
     # get and store tilt data from robot
     tilt = p.getEulerFromQuaternion(p.getBasePositionAndOrientation(bot_id)[1])[1]*180/3.1415
 
-    t_buff.append(tilt)
-    t_buff.pop(0)
+    buffers[0][0].append(tilt)
+    buffers[0][0].pop(0)
 
     # get user inputs from GUI
     turn = p.readUserDebugParameter(turn_input)
@@ -85,48 +78,40 @@ while True: # main loop
     Kd = p.readUserDebugParameter(d_input)
 
     # calculate and store PID values
-    P = t_buff[-1]/180.0
-    I = sum([ti/180.0 for ti in t_buff])
-    D = t_buff[-1]/180.0 - t_buff[-2]/180.0
+    P = buffers[0][0][-1]/180.0
+    I = sum([ti/180.0 for ti in buffers[0][0]])
+    D = buffers[0][0][-1]/180.0 - buffers[0][0][-2]/180.0
 
-    p_buff.append(P)
-    i_buff.append(I)
-    d_buff.append(D)
-    p_buff.pop(0)
-    i_buff.pop(0)
-    d_buff.pop(0)
+    for v,j in zip([P,I,D], range(1,4)):
+        buffers[j][0].append(v)
+        buffers[j][0].pop(0)
 
     # calculate and store control output based on PID values and coefficients
     ctrl = -1*(Kp*P + Ki*I + Kd*D)
+
+    ml = ctrl+turn+traverse
+    mr = ctrl-turn+traverse
     
-    m_buff.append(ctrl)
-    m_buff.pop(0)
+    buffers[4][0].append(ctrl)
+    buffers[4][1].append(ml)
+    buffers[4][2].append(mr)
+    buffers[4][0].pop(0)
+    buffers[4][1].pop(0)
+    buffers[4][2].pop(0)
 
     # set robot motor target speeds
-    p.setJointMotorControl2(bot_id, 0, p.VELOCITY_CONTROL, targetVelocity=ctrl+turn+traverse)
-    p.setJointMotorControl2(bot_id, 1, p.VELOCITY_CONTROL, targetVelocity=ctrl-turn+traverse)
+    p.setJointMotorControl2(bot_id, 0, p.VELOCITY_CONTROL, targetVelocity=ctrl)
+    p.setJointMotorControl2(bot_id, 1, p.VELOCITY_CONTROL, targetVelocity=ctrl)
 
-    # update graphs every 5th loop iteration
-    if i >= 5:
-        i = 1
-        t_line.set_data(x, t_buff)
-        p_line.set_data(x, p_buff)
-        i_line.set_data(x, i_buff)
-        d_line.set_data(x, d_buff)
-        m_line.set_data(x, m_buff)
-        ml_line.set_data(x, [m+turn+traverse for m in m_buff])
-        mr_line.set_data(x, [m-turn+traverse for m in m_buff])
+    # update graphs
+    for ax, line, buff, background in zip(axs, lines, buffers, backgrounds):
+        fig.canvas.restore_region(background)
+        for l, b in zip(line, buff): 
+            l.set_ydata(b)
+            ax.draw_artist(l)
+        fig.canvas.blit(ax.bbox)
 
-        for ax in all_ax:
-            ax.relim()
-            ax.autoscale_view(False,False,True)
-
-        # ax_t.set_xlim(x[0], x[-1])
-        fig.canvas.draw()
-        fig.canvas.flush_events()
-
-    # step simulation, wait, then repeat
+    # step simulation
     p.stepSimulation()
-    time.sleep(1./500.)
-    i += 1
+    # time.sleep(1./250.)
 p.disconnect()
