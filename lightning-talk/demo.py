@@ -23,7 +23,7 @@ d_input = p.addUserDebugParameter('D', 0 , 500, 250)
 
 # setup graphs
 plt.ion()
-fig = plt.figure(figsize=(8,4))
+fig = plt.figure(figsize=(8,6))
 gs = gridspec.GridSpec(1, 2, figure=fig)
 gs_io = gs[0].subgridspec(2,1)
 gs_pid = gs[1].subgridspec(3, 1)
@@ -34,6 +34,10 @@ ax_i = fig.add_subplot(gs_pid[1])
 ax_d = fig.add_subplot(gs_pid[2])
 ax_m = fig.add_subplot(gs_io[1])
 all_ax = [ax_t, ax_p, ax_i, ax_d, ax_m]
+
+ax_t.get_xaxis().set_ticklabels([])
+ax_p.get_xaxis().set_ticklabels([])
+ax_i.get_xaxis().set_ticklabels([])
 
 ax_t.set_title('Sensor Input')
 ax_p.set_title('Proportional')
