@@ -12,7 +12,6 @@ plane_id = p.loadURDF("plane.urdf")
 start_pos = [0,0,1]
 start_orientation = p.getQuaternionFromEuler([0,0,0])
 bot_id = p.loadURDF("lightning-talk/bot.urdf",start_pos, start_orientation)
-#set the center of mass frame (loadURDF sets base link frame) start_pos/Ornp.resetBasePositionAndOrientation(bot_id, start_pos, start_orientation)
 
 # setup user inputs
 turn_input = p.addUserDebugParameter('turn', -25, 25, 0)
