@@ -82,7 +82,7 @@ while True: # main loop
     I = sum([ti/180.0 for ti in tilt_data])
     D = tilt_data[-1]/180.0 - tilt_data[-2]/180.0
 
-    for v,j in zip([P,I,D], range(1,4)):
+    for v,j in zip([P,I,D], range(1,4)): # save PID data for plotting
         buffers[j][0].append(v)
         buffers[j][0].pop(0)
 
@@ -92,12 +92,9 @@ while True: # main loop
     ml = ctrl+turn+traverse
     mr = ctrl-turn+traverse
     
-    buffers[4][0].append(ctrl)
-    buffers[4][1].append(ml)
-    buffers[4][2].append(mr)
-    buffers[4][0].pop(0)
-    buffers[4][1].pop(0)
-    buffers[4][2].pop(0)
+    for v,j in zip([ctrl, ml, mr], range(3)): # save motor control data for plotting
+        buffers[4][j].append(v)
+        buffers[4][j].pop(0)
 
     # set robot motor target speeds
     p.setJointMotorControl2(bot_id, 0, p.VELOCITY_CONTROL, targetVelocity=ml)
