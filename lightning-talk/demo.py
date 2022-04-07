@@ -48,6 +48,7 @@ buffers = [
     [[0 for _ in range(buffer_size)]],
     [[0 for _ in range(buffer_size)], [0 for _ in range(buffer_size)], [0 for _ in range(buffer_size)]]
     ]
+tilt_data = buffers[0][0]
 
 # plot data on graphs
 colors = [['black'], ['red'], ['orange'], ['yellow'], ['black', 'blue', 'purple']]
@@ -66,8 +67,8 @@ while True: # main loop
     # get and store tilt data from robot
     tilt = p.getEulerFromQuaternion(p.getBasePositionAndOrientation(bot_id)[1])[1]*180/3.1415
 
-    buffers[0][0].append(tilt)
-    buffers[0][0].pop(0)
+    tilt_data.append(tilt)
+    tilt_data.pop(0)
 
     # get user inputs from GUI
     turn = p.readUserDebugParameter(turn_input)
@@ -77,9 +78,9 @@ while True: # main loop
     Kd = p.readUserDebugParameter(d_input)
 
     # calculate and store PID values
-    P = buffers[0][0][-1]/180.0
-    I = sum([ti/180.0 for ti in buffers[0][0]])
-    D = buffers[0][0][-1]/180.0 - buffers[0][0][-2]/180.0
+    P = tilt_data[-1]/180.0
+    I = sum([ti/180.0 for ti in tilt_data])
+    D = tilt_data[-1]/180.0 - tilt_data[-2]/180.0
 
     for v,j in zip([P,I,D], range(1,4)):
         buffers[j][0].append(v)
