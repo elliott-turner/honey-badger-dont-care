@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<robot name="inverse_pendulum">
+
+    <material name="blue">
+        <color rgba="0 0 0.8 1"/>
+    </material>
+
+    <link name="disk">
+         <contact>
+            <rolling_friction value="0.005"/>
+             <spinning_friction value="0.005"/>
+        </contact>
+        <visual>
+            <geometry>
+                <cylinder length="0.03" radius="0.50"/>
+            </geometry>
+            <material name="blue"/>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder length="0.03" radius="0.50"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="1"/>
+            <inertia ixx="0.06" iyy="0.06" izz="0.13"/>
+        </inertial>
+    </link>
+
+    <link name="stick">
+        <visual>
+            <geometry>
+                <cylinder length="1.00" radius="0.06"/>
+            </geometry>
+        </visual>
+        <collision>
+            <geometry>
+                <cylinder length="1.00" radius="0.06"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="1"/>
+            <inertia ixx="0.0842" iyy="0.0842" izz="0.0018"/>
+        </inertial>
+    </link>
+
+    <joint name="ball_joint" type="floating">
+        <parent link="disk"/>
+        <child link="stick"/>
+        <origin xyz="0.0 0.0 0.5"/>
+    </joint>
+
+</robot>
