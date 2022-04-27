@@ -29,7 +29,7 @@ Kd = 0
 last_error = 0
 
 # setup user inputs
-velocity_input = p.addUserDebugParameter('velocity', -25, 25, 0)
+velocity_input = p.addUserDebugParameter('velocity', -5, 5, 0)
 p_input = p.addUserDebugParameter('P', 0, 1, 1) # changed - these values were high 
 i_input = p.addUserDebugParameter('I', 0, 2, 1) # changed - these values were high
 d_input = p.addUserDebugParameter('D', 0 , 1, .05) # changed - these values were high
@@ -38,42 +38,40 @@ d_input = p.addUserDebugParameter('D', 0 , 1, .05) # changed - these values were
 #     time.sleep(.005) 
 
 tilt_data = []
+link_state = []
 while True: # main loop
     # get and store tilt data from robot
-    # tilt = p.getEulerFromQuaternion(p.getBasePositionAndOrientation(bot_id)[1])[0]
-    tilt = p.getBasePositionAndOrientation(bot_id)
+
+    tilt = p.getEulerFromQuaternion(p.getLinkState(bot_id, 1)[1])[1]
     print(tilt)
     
-    # initial_tilt = p.getEulerFromQuaternion(start_orientation)[1]
+    initial_tilt = p.getEulerFromQuaternion(start_orientation)[1]
 
     tilt_data.append(tilt)
-    # tilt_data.pop(0)
+    tilt_data.pop(0)
     
-    # error = tilt - initial_tilt
+    error = tilt - initial_tilt
 
-    # # get user inputs from GUI
-    # turn = p.readUserDebugParameter(turn_input)
-    # traverse = -1*p.readUserDebugParameter(traverse_input)
-    # Kp = p.readUserDebugParameter(p_input)
-    # Ki = p.readUserDebugParameter(i_input)
-    # Kd = p.readUserDebugParameter(d_input)
+    # get user inputs from GUI
+    velocity = p.readUserDebugParameter(velocity_input)
+    Kp = p.readUserDebugParameter(p_input)
+    Ki = p.readUserDebugParameter(i_input)
+    Kd = p.readUserDebugParameter(d_input)
 
-    # # calculate and store PID values
-    # P = error
-    # I = I + error
-    # D = error - last_error
-    
-    # last_error = error
+    # calculate and store PID values
+    P = error
+    I = I + error
+    D = error - last_error
+    last_error = error
 
     # for v,j in zip([P,I,D], range(1,4)): # save PID data for plotting
     #     buffers[j][0].append(v)
     #     buffers[j][0].pop(0)
 
-    # # calculate and store control output based on PID values and coefficients
-    # ctrl = -1*(Kp*P + Ki*I + Kd*D)
+    # calculate and store control output based on PID values and coefficients
+    ctrl = -1*(Kp*P + Ki*I + Kd*D)
 
-    # ml = ctrl+turn+traverse
-    # mr = ctrl-turn+traverse
+    cart_vel = ctrl + velocity
     
     # for v,j in zip([ctrl, ml, mr], range(3)): # save motor control data for plotting
     #     buffers[4][j].append(v)
@@ -81,7 +79,7 @@ while True: # main loop
 
     # # set robot motor target speeds
     # p.setJointMotorControl2(bot_id, 0, p.VELOCITY_CONTROL, targetVelocity=ml)
-    # p.setJointMotorControl2(bot_id, 1, p.VELOCITY_CONTROL, targetVelocity=mr)
+    p.setJointMotorControl2(bot_id, 0, p.VELOCITY_CONTROL, targetVelocity=-cart_vel)
 
     # # update graphs
     # for ax, line, buff, background in zip(axs, lines, buffers, backgrounds):
