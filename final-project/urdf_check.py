@@ -41,7 +41,7 @@ tilt_data = []
 while True: # main loop
     # get and store tilt data from robot
     # tilt = p.getEulerFromQuaternion(p.getBasePositionAndOrientation(bot_id)[1])[0]
-    tilt = p.getBasePositionAndOrientation(bot_id)[0]
+    tilt = p.getBasePositionAndOrientation(bot_id)
     print(tilt)
     
     # initial_tilt = p.getEulerFromQuaternion(start_orientation)[1]
