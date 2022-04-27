@@ -8,6 +8,7 @@ Created on Thu Apr 21 19:37:02 2022
 import pybullet as p 
 import time 
 import pybullet_data 
+import random
 
 physicsClient = p.connect(p.GUI) #or p.DIRECT for non-graphical version 
 p.setAdditionalSearchPath(pybullet_data.getDataPath()) #optionally 
@@ -41,6 +42,11 @@ tilt_data = []
 link_state = []
 while True: # main loop
     # get and store tilt data from robot
+    
+    wind = random.randint(-2, 2)
+    print(wind)
+    p.applyExternalForce(bot_id, 1, (wind, 0, 0), (0, 0, 0), p.LINK_FRAME)
+
 
     tilt = p.getEulerFromQuaternion(p.getLinkState(bot_id, 1)[1])[1]
     print(tilt)
@@ -71,7 +77,7 @@ while True: # main loop
     # calculate and store control output based on PID values and coefficients
     ctrl = -1*(Kp*P + Ki*I + Kd*D)
 
-    cart_vel = ctrl + velocity
+    cart_vel = ctrl + velocity + wind
     
     # for v,j in zip([ctrl, ml, mr], range(3)): # save motor control data for plotting
     #     buffers[4][j].append(v)
