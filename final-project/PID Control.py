@@ -2,6 +2,7 @@ import pybullet as p
 import time
 import pybullet_data
 import random
+import math
 
 physicsClient = p.connect(p.GUI)  # or p.DIRECT for non-graphical version
 p.setAdditionalSearchPath(pybullet_data.getDataPath())  # optionally
@@ -47,8 +48,9 @@ testi = 30
 testd = 5
 
 # setup user inputs
-velocityx_input = p.addUserDebugParameter('velocityX', -5, 5, 0)
-velocityy_input = p.addUserDebugParameter('velocityY', -5, 5, 0)
+
+velocityx_input = p.addUserDebugParameter('g*sin(theta of y)', -5, 5, 0)
+velocityy_input = p.addUserDebugParameter('g*sin(theta of x)', -5, 5, 0)
 
 px_input = p.addUserDebugParameter('Px', 0, 200, testp)  # changed - these values were high
 ix_input = p.addUserDebugParameter('Ix', 0, 150, testi)  # changed - these values were high
@@ -66,11 +68,17 @@ errory_data = [0]
 
 step = 0
 
+def controlV(velocity, g, step):
+    a = velocity
+    theta = math.degrees(math.asin(a/g))
+    print()
+    return theta
+
 while True:  # main loop
     # get and store tilt data from robot
     step += 1
 
-    windStrength = 25
+    windStrength = 5
     windx = random.uniform(-windStrength, windStrength)
     windy = random.uniform(-windStrength, windStrength)
 
@@ -90,8 +98,8 @@ while True:  # main loop
     errory = tilty_data[0] - tilty_data[step]
     errory_data.append(errory)
 
-    baseVx = p.getBaseVelocity(1)[0][0]
-    baseVy = p.getBaseVelocity(1)[0][1]
+    baseVx = p.getJointState(bot_id, 3)[1]
+    baseVy = p.getJointState(bot_id, 3)[1]
 
 
     # get user inputs from GUI
@@ -123,6 +131,14 @@ while True:  # main loop
     totalVelocityy = ctrly + velocityy
 
     print(totalVelocityx, totalVelocityy, step)
+
+    if abs(velocityx) > 0:
+        thetax = controlV(velocityx, g, step)
+        tiltx_data[0] = thetax * ((math.pi / 2) / 90)
+
+    if abs(velocityy) > 0:
+        thetay = controlV(velocityx, g, step)
+        tilty_data[0] = thetay * ((math.pi / 2) / 90)
 
     p.setJointMotorControl2(bot_id, x_joint_id, p.VELOCITY_CONTROL, targetVelocity=totalVelocityx)
     p.setJointMotorControl2(bot_id, y_joint_id, p.VELOCITY_CONTROL, targetVelocity=totalVelocityy)
