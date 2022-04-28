@@ -31,32 +31,38 @@ last_error = 0
 
 # setup user inputs
 velocity_input = p.addUserDebugParameter('velocity', -5, 5, 0)
-p_input = p.addUserDebugParameter('P', 0, 1, 1) # changed - these values were high 
-i_input = p.addUserDebugParameter('I', 0, 2, 1) # changed - these values were high
-d_input = p.addUserDebugParameter('D', 0 , 1, .05) # changed - these values were high
-# for i in range (10000):   
-#     p.stepSimulation()   
-#     time.sleep(.005) 
+p_input = p.addUserDebugParameter('P', 0, 10, 8)  # changed - these values were high
+i_input = p.addUserDebugParameter('I', 0, 10, 5)  # changed - these values were high
+d_input = p.addUserDebugParameter('D', 0, 1, .05)  # changed - these values were high
+# for i in range (10000):
+#     p.stepSimulation()
+#     time.sleep(.005)
 
-tilt_data = []
+tilt_data = [0]
+error_data = [0]
 link_state = []
-while True: # main loop
+step = 0
+
+while True:  # main loop
     # get and store tilt data from robot
     
     wind = random.randint(-2, 2)
     print(wind)
     p.applyExternalForce(bot_id, 1, (wind, 0, 0), (0, 0, 0), p.LINK_FRAME)
 
+    step += 1
 
+    wind = random.uniform(-2, 2)
+
+    p.applyExternalForce(bot_id, 1, (wind, 0, 0), (0, 0, 0), p.LINK_FRAME)
+
+    # 0 to pi/2 to 0 to -pi/2
     tilt = p.getEulerFromQuaternion(p.getLinkState(bot_id, 1)[1])[1]
-    print(tilt)
-    
-    initial_tilt = p.getEulerFromQuaternion(start_orientation)[1]
 
     tilt_data.append(tilt)
-    tilt_data.pop(0)
-    
-    error = tilt - initial_tilt
+
+    error = tilt_data[0] - tilt_data[step]
+    error_data.append(error)
 
     # get user inputs from GUI
     velocity = p.readUserDebugParameter(velocity_input)
@@ -66,19 +72,23 @@ while True: # main loop
 
     # calculate and store PID values
     P = error
-    I = I + error
-    D = error - last_error
-    last_error = error
+
+    I += (error_data[step] - error_data[step - 1])/2
+
+    D = -1 * (tilt_data[step] - tilt_data[step - 1])
 
     # for v,j in zip([P,I,D], range(1,4)): # save PID data for plotting
     #     buffers[j][0].append(v)
     #     buffers[j][0].pop(0)
 
     # calculate and store control output based on PID values and coefficients
-    ctrl = -1*(Kp*P + Ki*I + Kd*D)
+    ctrl = (Kp * P + Ki * I + Kd * D)
 
     cart_vel = ctrl + velocity + wind
     
+    cart_vel = ctrl + velocity
+    print(cart_vel, tilt, step)
+
     # for v,j in zip([ctrl, ml, mr], range(3)): # save motor control data for plotting
     #     buffers[4][j].append(v)
     #     buffers[4][j].pop(0)
@@ -90,14 +100,12 @@ while True: # main loop
     # # update graphs
     # for ax, line, buff, background in zip(axs, lines, buffers, backgrounds):
     #     fig.canvas.restore_region(background)
-    #     for l, b in zip(line, buff): 
+    #     for l, b in zip(line, buff):
     #         l.set_ydata(b)
     #         ax.draw_artist(l)
     #     fig.canvas.blit(ax.bbox)
 
     # step simulation
     p.stepSimulation()
-    time.sleep(1./250.)
+    time.sleep(1. / 250.)
 p.disconnect()
-
-
