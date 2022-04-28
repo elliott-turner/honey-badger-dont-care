@@ -51,8 +51,8 @@ prevUserV = [(0, 0)]
 
 # setup user inputs
 
-velocityx_input = p.addUserDebugParameter('g*sin(theta of x)', -5, 5, 0)
-velocityy_input = p.addUserDebugParameter('g*sin(theta of y)', -5, 5, 0)
+velocityx_input = p.addUserDebugParameter('Force on X-axis', -5, 5, 0)
+velocityy_input = p.addUserDebugParameter('Force on Y-axis', -5, 5, 0)
 
 px_input = p.addUserDebugParameter('Px', 0, 1000, testp)  # changed - these values were high
 ix_input = p.addUserDebugParameter('Ix', 0, 1000, testi)  # changed - these values were high
