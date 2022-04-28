@@ -47,6 +47,9 @@ testi = 30
 testd = 5
 
 # setup user inputs
+x_input = p.addUserDebugParameter('x', -15, 5, -5)
+y_input = p.addUserDebugParameter('y', -10, 10, 0)
+
 velocityx_input = p.addUserDebugParameter('velocityX', -5, 5, 0)
 velocityy_input = p.addUserDebugParameter('velocityY', -5, 5, 0)
 
@@ -67,6 +70,21 @@ errory_data = [0]
 step = 0
 
 while True:  # main loop
+    # get user inputs from GUI
+    x_target = p.readUserDebugParameter(x_input)
+    y_target = p.readUserDebugParameter(y_input)
+
+    velocityx = p.readUserDebugParameter(velocityx_input)
+    velocityy = p.readUserDebugParameter(velocityy_input)
+
+    Kpx = p.readUserDebugParameter(px_input)
+    Kix = p.readUserDebugParameter(ix_input)
+    Kdx = p.readUserDebugParameter(dx_input)
+
+    Kpy = p.readUserDebugParameter(py_input)
+    Kiy = p.readUserDebugParameter(iy_input)
+    Kdy = p.readUserDebugParameter(dy_input)
+
     # get and store tilt data from robot
     step += 1
 
@@ -81,6 +99,11 @@ while True:  # main loop
     tiltx = p.getEulerFromQuaternion(p.getLinkState(bot_id, linkx_id)[1])[1]
     tilty = p.getEulerFromQuaternion(p.getLinkState(bot_id, linky_id)[1])[0]
 
+    # compensate for lateral offset
+    current_x, current_y = p.getLinkState(bot_id, x_joint_id)[0][0:2]
+    tiltx += (x_target - current_x)*-0.1
+    tilty += (y_target - current_y)*0.1
+
     tiltx_data.append(tiltx)
     tilty_data.append(tilty)
 
@@ -92,20 +115,6 @@ while True:  # main loop
 
     baseVx = p.getBaseVelocity(1)[0][0]
     baseVy = p.getBaseVelocity(1)[0][1]
-
-
-    # get user inputs from GUI
-
-    velocityx = p.readUserDebugParameter(velocityx_input)
-    velocityy = p.readUserDebugParameter(velocityy_input)
-
-    Kpx = p.readUserDebugParameter(px_input)
-    Kix = p.readUserDebugParameter(ix_input)
-    Kdx = p.readUserDebugParameter(dx_input)
-
-    Kpy = p.readUserDebugParameter(py_input)
-    Kiy = p.readUserDebugParameter(iy_input)
-    Kdy = p.readUserDebugParameter(dy_input)
 
     # calculate and store PID values
     Px = errorx
