@@ -74,8 +74,8 @@ while True:  # main loop
     windx = random.uniform(-windStrength, windStrength)
     windy = random.uniform(-windStrength, windStrength)
 
-    #p.applyExternalForce(bot_id, linkx_id, (windx, 0, 0), (0, 0, 0), p.LINK_FRAME)
-    #p.applyExternalForce(bot_id, linky_id, (0, windy, 0), (0, 0, 0), p.LINK_FRAME)
+    p.applyExternalForce(bot_id, linkx_id, (windx, 0, 0), (0, 0, 0), p.LINK_FRAME)
+    p.applyExternalForce(bot_id, linky_id, (0, windy, 0), (0, 0, 0), p.LINK_FRAME)
 
     # 0 to pi/2 to 0 to -pi/2
     tiltx = p.getEulerFromQuaternion(p.getLinkState(bot_id, linkx_id)[1])[1]
