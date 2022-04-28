@@ -1,15 +1,22 @@
-import pybullet as p
-import time
-import pybullet_data
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Apr 21 19:37:02 2022
+
+@author: britt
+"""
+
+import pybullet as p 
+import time 
+import pybullet_data 
 import random
 
-physicsClient = p.connect(p.GUI)  # or p.DIRECT for non-graphical version
-p.setAdditionalSearchPath(pybullet_data.getDataPath())  # optionally
-p.setGravity(0, 0, -10)
-planeId = p.loadURDF("plane.urdf")
-start_pos = [0, 0, 1]
-start_orientation = p.getQuaternionFromEuler([0, 0, 0])
-bot_id = p.loadURDF("cartpole.urdf", start_pos, start_orientation)
+physicsClient = p.connect(p.GUI) #or p.DIRECT for non-graphical version 
+p.setAdditionalSearchPath(pybullet_data.getDataPath()) #optionally 
+p.setGravity(0,0,-10) 
+planeId = p.loadURDF("plane.urdf") 
+start_pos = [0,0,1] 
+start_orientation = p.getQuaternionFromEuler([0,0,0]) 
+bot_id = p.loadURDF("doublecartpole.urdf",start_pos, start_orientation)
 p.getJointInfo(bot_id, 0)
 p.setJointMotorControl2(bot_id, 1, p.POSITION_CONTROL, force=0)
 
@@ -38,6 +45,11 @@ step = 0
 
 while True:  # main loop
     # get and store tilt data from robot
+    
+    wind = random.randint(-2, 2)
+    print(wind)
+    p.applyExternalForce(bot_id, 1, (wind, 0, 0), (0, 0, 0), p.LINK_FRAME)
+
     step += 1
 
     wind = random.uniform(-2, 2)
@@ -72,6 +84,8 @@ while True:  # main loop
     # calculate and store control output based on PID values and coefficients
     ctrl = (Kp * P + Ki * I + Kd * D)
 
+    cart_vel = ctrl + velocity + wind
+    
     cart_vel = ctrl + velocity
     print(cart_vel, tilt, step)
 
