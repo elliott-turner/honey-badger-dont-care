@@ -43,22 +43,24 @@ Kdy = 0
 
 g = -10
 
-testp = 50
-testi = 30
-testd = 5
+testp = 80
+testi = 10
+testd = .05
+
+prevUserV = [(0, 0)]
 
 # setup user inputs
 
-velocityx_input = p.addUserDebugParameter('g*sin(theta of y)', -5, 5, 0)
-velocityy_input = p.addUserDebugParameter('g*sin(theta of x)', -5, 5, 0)
+velocityx_input = p.addUserDebugParameter('g*sin(theta of x)', -5, 5, 0)
+velocityy_input = p.addUserDebugParameter('g*sin(theta of y)', -5, 5, 0)
 
-px_input = p.addUserDebugParameter('Px', 0, 200, testp)  # changed - these values were high
-ix_input = p.addUserDebugParameter('Ix', 0, 150, testi)  # changed - these values were high
-dx_input = p.addUserDebugParameter('Dx', 0, 10, testd)  # changed - these values were high
+px_input = p.addUserDebugParameter('Px', 0, 1000, testp)  # changed - these values were high
+ix_input = p.addUserDebugParameter('Ix', 0, 1000, testi)  # changed - these values were high
+dx_input = p.addUserDebugParameter('Dx', 0, 1000, testd)  # changed - these values were high
 
-py_input = p.addUserDebugParameter('Py', 0, 200, testp)  # changed - these values were high
-iy_input = p.addUserDebugParameter('Iy', 0, 150, testi)  # changed - these values were high
-dy_input = p.addUserDebugParameter('Dy', 0, 10, testd)  # changed - these values were high
+py_input = p.addUserDebugParameter('Py', 0, 1000, testp)  # changed - these values were high
+iy_input = p.addUserDebugParameter('Iy', 0, 1000, testi)  # changed - these values were high
+dy_input = p.addUserDebugParameter('Dy', 0, 1000, testd)  # changed - these values were high
 
 tiltx_data = [0]
 errorx_data = [0]
@@ -71,19 +73,23 @@ step = 0
 def controlV(velocity, g, step):
     a = velocity
     theta = math.degrees(math.asin(a/g))
-    print()
     return theta
+
+def movementStablize(velocity, g, step):
+    a = velocity
+    theta = math.degrees(math.asin(a / g))
+    return -theta
 
 while True:  # main loop
     # get and store tilt data from robot
     step += 1
 
-    windStrength = 5
+    windStrength = 50
     windx = random.uniform(-windStrength, windStrength)
     windy = random.uniform(-windStrength, windStrength)
 
-    p.applyExternalForce(bot_id, linkx_id, (windx, 0, 0), (0, 0, 0), p.LINK_FRAME)
-    p.applyExternalForce(bot_id, linky_id, (0, windy, 0), (0, 0, 0), p.LINK_FRAME)
+    #p.applyExternalForce(bot_id, linkx_id, (windx, 0, 0), (0, 0, 0), p.LINK_FRAME)
+    #p.applyExternalForce(bot_id, linky_id, (0, windy, 0), (0, 0, 0), p.LINK_FRAME)
 
     # 0 to pi/2 to 0 to -pi/2
     tiltx = p.getEulerFromQuaternion(p.getLinkState(bot_id, linkx_id)[1])[1]
@@ -107,6 +113,8 @@ while True:  # main loop
     velocityx = p.readUserDebugParameter(velocityx_input)
     velocityy = p.readUserDebugParameter(velocityy_input)
 
+    prevUserV.append((velocityx, velocityy))
+
     Kpx = p.readUserDebugParameter(px_input)
     Kix = p.readUserDebugParameter(ix_input)
     Kdx = p.readUserDebugParameter(dx_input)
@@ -117,12 +125,12 @@ while True:  # main loop
 
     # calculate and store PID values
     Px = errorx
-    Ix += (errorx_data[step] - errorx_data[step - 1])/2
-    Dx = -1 * (tiltx_data[step] - tiltx_data[step - 1])
+    Ix += (errorx_data[step] - errorx_data[step - 1])/2 + errorx_data[step-1]
+    Dx = (errorx_data[step] - errorx_data[step - 1])
 
     Py = errory
-    Iy += (errory_data[step] - errory_data[step - 1]) / 2
-    Dy = -1 * (tilty_data[step] - tilty_data[step - 1])
+    Iy += (errory_data[step] - errory_data[step - 1]) / 2 + errory_data[step-1]
+    Dy = (errory_data[step] - errory_data[step - 1])
 
     ctrlx = -(Kpx * Px + Kix * Ix + Kdx * Dx)
     ctrly = -(Kpy * Py + Kiy * Iy + Kdy * Dy)
@@ -130,18 +138,34 @@ while True:  # main loop
     totalVelocityx = ctrlx + velocityx
     totalVelocityy = ctrly + velocityy
 
-    print(totalVelocityx, totalVelocityy, step)
-
     if abs(velocityx) > 0:
         thetax = controlV(velocityx, g, step)
         tiltx_data[0] = thetax * ((math.pi / 2) / 90)
 
     if abs(velocityy) > 0:
-        thetay = controlV(velocityx, g, step)
+        thetay = controlV(velocityy, g, step)
         tilty_data[0] = thetay * ((math.pi / 2) / 90)
+
+    # if abs(velocityx) > 0:
+    #     totalVelocityx = -velocityx
+    #     if tiltx * (90/(math.pi/2)) == movementStablize(velocityx, g, step):
+    #         totalVelocityx = ctrlx
+    #
+    # if abs(velocityy) > 0:
+    #     totalVelocityy = -velocityy
+    #     if tilty * (90/(math.pi/2)) == movementStablize(velocityy, g, step):
+    #         totalVelocityy = ctrly
+
+
+    # if abs(velocityx) > 0:
+    #     thetay, velocityy = movementStablize(velocityy, g, step)
+    #     tilty_data[0] = thetay * ((math.pi / 2) / 90)
+    #     totalVelocityy = velocityy
 
     p.setJointMotorControl2(bot_id, x_joint_id, p.VELOCITY_CONTROL, targetVelocity=totalVelocityx)
     p.setJointMotorControl2(bot_id, y_joint_id, p.VELOCITY_CONTROL, targetVelocity=totalVelocityy)
+
+    print(p.getJointState(bot_id, 3)[1], tiltx, tilty, step)
 
     p.stepSimulation()
     time.sleep(1. / 250.)
