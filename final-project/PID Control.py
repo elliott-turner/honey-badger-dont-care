@@ -43,14 +43,17 @@ Kdy = 0
 
 g = -10
 
-testp = 50
-testi = 30
-testd = 5
+testp = 2
+testi = 2
+testd = 0.5
 
 # setup user inputs
 
-velocityx_input = p.addUserDebugParameter('g*sin(theta of y)', -5, 5, 0)
-velocityy_input = p.addUserDebugParameter('g*sin(theta of x)', -5, 5, 0)
+velocityx_input = p.addUserDebugParameter('Cart X-Velocity', -5, 5, 0)
+velocityy_input = p.addUserDebugParameter('Cart Y-Velocity', -5, 5, 0)
+
+p.setJointMotorControl2(bot_id, stick_x_joint_id, p.VELOCITY_CONTROL, velocityx_input, force=0)
+p.setJointMotorControl2(bot_id, stick_y_joint_id, p.VELOCITY_CONTROL, velocityy_input, force=0)
 
 px_input = p.addUserDebugParameter('Px', 0, 200, testp)  # changed - these values were high
 ix_input = p.addUserDebugParameter('Ix', 0, 150, testi)  # changed - these values were high
@@ -78,7 +81,7 @@ while True:  # main loop
     # get and store tilt data from robot
     step += 1
 
-    windStrength = 5
+    windStrength = 50
     windx = random.uniform(-windStrength, windStrength)
     windy = random.uniform(-windStrength, windStrength)
 
@@ -86,15 +89,15 @@ while True:  # main loop
     p.applyExternalForce(bot_id, linky_id, (0, windy, 0), (0, 0, 0), p.LINK_FRAME)
 
     # 0 to pi/2 to 0 to -pi/2
+    
     tiltx = p.getEulerFromQuaternion(p.getLinkState(bot_id, linkx_id)[1])[1]
-    tilty = p.getEulerFromQuaternion(p.getLinkState(bot_id, linky_id)[1])[0]
-
     tiltx_data.append(tiltx)
-    tilty_data.append(tilty)
-
     errorx = tiltx_data[0] - tiltx_data[step]
     errorx_data.append(errorx)
-
+    
+    
+    tilty = p.getEulerFromQuaternion(p.getLinkState(bot_id, linky_id)[1])[0]
+    tilty_data.append(tilty)
     errory = tilty_data[0] - tilty_data[step]
     errory_data.append(errory)
 
@@ -117,18 +120,21 @@ while True:  # main loop
 
     # calculate and store PID values
     Px = errorx
-    Ix += (errorx_data[step] - errorx_data[step - 1])/2
-    Dx = -1 * (tiltx_data[step] - tiltx_data[step - 1])
+    Ix += errorx_data[step] 
+    Dx = errorx_data[step] - errorx_data[step-1]
+    
+    #- errorx_data[step - 1])/2
+    #- 1 * (tiltx_data[step] - tiltx_data[step - 1])
 
     Py = errory
-    Iy += (errory_data[step] - errory_data[step - 1]) / 2
-    Dy = -1 * (tilty_data[step] - tilty_data[step - 1])
+    Iy += errory_data[step] # - errory_data[step - 1]) / 2
+    Dy = errory_data[step] - errory_data[step - 1]
 
-    ctrlx = -(Kpx * Px + Kix * Ix + Kdx * Dx)
-    ctrly = -(Kpy * Py + Kiy * Iy + Kdy * Dy)
+    PIDx = -(Kpx * Px + Kix * Ix + Kdx * Dx)
+    PIDy = -(Kpy * Py + Kiy * Iy + Kdy * Dy)
 
-    totalVelocityx = ctrlx + velocityx
-    totalVelocityy = ctrly + velocityy
+    totalVelocityx = PIDx + velocityx
+    totalVelocityy = PIDy + velocityy
 
     print(totalVelocityx, totalVelocityy, step)
 
