@@ -50,13 +50,13 @@ testd = 5
 velocityx_input = p.addUserDebugParameter('velocityX', -5, 5, 0)
 velocityy_input = p.addUserDebugParameter('velocityY', -5, 5, 0)
 
-px_input = p.addUserDebugParameter('Px', 0, testp, testp)  # changed - these values were high
-ix_input = p.addUserDebugParameter('Ix', 0, testi, testi)  # changed - these values were high
-dx_input = p.addUserDebugParameter('Dx', 0, 1, testd)  # changed - these values were high
+px_input = p.addUserDebugParameter('Px', 0, 200, testp)  # changed - these values were high
+ix_input = p.addUserDebugParameter('Ix', 0, 150, testi)  # changed - these values were high
+dx_input = p.addUserDebugParameter('Dx', 0, 10, testd)  # changed - these values were high
 
-py_input = p.addUserDebugParameter('Px', 0, testp, testp)  # changed - these values were high
-iy_input = p.addUserDebugParameter('Ix', 0, testi, testi)  # changed - these values were high
-dy_input = p.addUserDebugParameter('Dx', 0, 1, testd)  # changed - these values were high
+py_input = p.addUserDebugParameter('Py', 0, 200, testp)  # changed - these values were high
+iy_input = p.addUserDebugParameter('Iy', 0, 150, testi)  # changed - these values were high
+dy_input = p.addUserDebugParameter('Dy', 0, 10, testd)  # changed - these values were high
 
 tiltx_data = [0]
 errorx_data = [0]
