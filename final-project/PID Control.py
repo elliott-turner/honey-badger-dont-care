@@ -165,8 +165,6 @@ while True:  # main loop
     p.setJointMotorControl2(bot_id, x_joint_id, p.VELOCITY_CONTROL, targetVelocity=totalVelocityx)
     p.setJointMotorControl2(bot_id, y_joint_id, p.VELOCITY_CONTROL, targetVelocity=totalVelocityy)
 
-    print(p.getJointState(bot_id, 3)[1], tiltx, tilty, step)
-
     p.stepSimulation()
     time.sleep(1. / 250.)
 p.disconnect()
