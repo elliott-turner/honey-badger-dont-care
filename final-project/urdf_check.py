@@ -16,7 +16,7 @@ p.setGravity(0,0,-10)
 planeId = p.loadURDF("plane.urdf") 
 start_pos = [0,0,1] 
 start_orientation = p.getQuaternionFromEuler([0,0,0]) 
-bot_id = p.loadURDF("cartpole.urdf",start_pos, start_orientation) 
+bot_id = p.loadURDF("doublecartpole.urdf",start_pos, start_orientation)
 p.getJointInfo(bot_id, 0)
 p.setJointMotorControl2(bot_id, 1, p.POSITION_CONTROL, force=0)
 
