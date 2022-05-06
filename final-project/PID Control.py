@@ -10,7 +10,7 @@ p.setGravity(0, 0, -10)
 planeId = p.loadURDF("plane.urdf")
 start_pos = [0, 0, 1]
 start_orientation = p.getQuaternionFromEuler([0, 0, 0])
-bot_id = p.loadURDF("xycartpole.urdf", start_pos, start_orientation)
+bot_id = p.loadURDF("final-project/xycartpole.urdf", start_pos, start_orientation)
 
 y_joint_id = 0
 x_joint_id = 1

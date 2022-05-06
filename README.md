@@ -32,8 +32,11 @@ A complete list of all required packages can be found in `requirements.txt`. The
 pip install -r requirements.txt
 ```
 
-# Demo
-A simple demonstration has been put together to illustrate the basic features of pybullet. This code can be found in the `lightning-talk/` folder. To run the demo, simply run `python lightning-talk/demo.py` from the base directoy.
+# Lightning Talk Demonstration
+A simple demonstration has been put together to illustrate the basic features of pybullet. This code can be found in the `lightning-talk/` folder. To run the demo, simply run the following from the base directory.
+```
+python lightning-talk/demo.py
+```
 
 ## PyBullet GUI
 The PyBullet GUI provides a live view of the pybullet simulation and enables control of elements within the simulation. Robot control parameters can be set via the sliders on the right sidebar. These are listed in detail below.
@@ -56,3 +59,25 @@ A screenshot of the PyBullet GUI can be seen below...
 ## Matplotlib Graph
 A matplotlib graph window will also open and displays live data. Data points are recorded every simulation step and only the most recent 100 data points are saved and displayed at any given time. An example of what this window looks like can be seen below...
 ![matplotlib figure](readme/graph_screenshot.png)
+
+# Final Demonstration
+The final project extended the demonstration from the lightning talk, replacing the two-wheeled robot with an inverted pendulum and adding a second axis to balance about.
+
+The resulting python script can be run with the following command.
+```
+python final-project/PID\ Control.py
+```
+The sliders on the right bar have been changed to contain the following parameters.
+
+**Parameters: (independent instance of each for x and y axes)**
+- Force on axis: A force applied on the platform in the x-axis to maintain the offset angle applied to the pole.
+- P: Proportional gain
+- I: Integral gain
+- D: Derivative gain 
+
+
+A screenshot of the PyBullet GUI can be seen below...
+![gui window](readme/pybullet_gui_screenshot_final.png)
+
+## Future Work
+There is a lot of room for improvement in this project. The first recommended improvement would be to add PID control loops to maintain the position of the cart/pole on the x/y plane.
