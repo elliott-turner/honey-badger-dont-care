@@ -81,3 +81,5 @@ A screenshot of the PyBullet GUI can be seen below...
 
 ## Future Work
 There is a lot of room for improvement in this project. The first recommended improvement would be to add PID control loops to maintain the position of the cart/pole on the x/y plane.
+For the velocity and position control, unlike the force(acceleration) control that we have currently implemented, could be implemented by linearizing the state-space equations. In addition, deriving the system control transfer function, the user would be able to control every input and output of the system.
+For the PID gain values, more obtimized values could be found using Ziegler-Nichols method, which requires the user to find some additional variables to mathamatically tune the PID gain values whereas the current method manually tunes the gain values, which is good enough, but not as precise as the method mentioned. In addition, an automatic PID tuning method could be considered, in case if PID gain values need to be tuned automatically. For such case, the relay (Åström–Hägglund) method could be considered.
